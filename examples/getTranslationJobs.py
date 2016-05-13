@@ -6,7 +6,7 @@
 # noted. Details are below.
 #
 # New BSD License
-# Copyright (c) 2009-2012, myGengo, Inc.
+# Copyright (c) 2009-2015, Gengo, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -18,7 +18,7 @@
 # Redistributions in binary form must reproduce the above copyright notice,
 # this list of conditions and the following disclaimer in the documentation
 # and/or other materials provided with the distribution.
-# Neither the name of myGengo, Inc. nor the names of its contributors may
+# Neither the name of Gengo, Inc. nor the names of its contributors may
 # be used to endorse or promote products derived from this software
 # without specific prior written permission.
 #
@@ -41,8 +41,9 @@ gengo = Gengo(
     public_key='your_public_key',
     private_key='your_private_key',
     sandbox=True,
+    debug=True
 )
 
 # Think of this as a "search my jobs" method, and it becomes very
 # self-explanatory.
-print gengo.getTranslationJobs(status='approved', count=15)
+print(gengo.getTranslationJobs(status='approved', count=15))

@@ -40,16 +40,12 @@ from gengo import Gengo
 gengo = Gengo(
     public_key='your_public_key',
     private_key='your_private_key',
-    sandbox=True,
+    sandbox=False,
     debug=True
 )
 
-# Update a job that has an id of 42, and reject it, cite the reason,
-# add a comment, and throw up some captcha stuff. See the docs for
-# more information pertaining to this method, it can do quite a bit. :)
-print(gengo.updateTranslationJob(id=42, action={
-    'action': 'reject',
-    'reason': 'quality',
-    'comment': 'My grandmother does better.',
-    'captcha': 'bert'
+# Post a comment on a specific order; perhaps you have an update for the
+# translator or something of the sort on your entire order.
+print(gengo.postOrderComment(id=124, comment={
+    'body': 'I love order 124!',
 }))

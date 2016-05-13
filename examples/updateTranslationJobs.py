@@ -44,12 +44,46 @@ gengo = Gengo(
     debug=True
 )
 
-# Update a job that has an id of 42, and reject it, cite the reason,
-# add a comment, and throw up some captcha stuff. See the docs for
-# more information pertaining to this method, it can do quite a bit. :)
-print(gengo.updateTranslationJob(id=42, action={
+# Archive all jobs
+gengo.updateTranslationJobs(action={
+    'job_ids': [4020, 1082],
+    'action': 'archive'
+})
+
+# Revise a group of jobs
+gengo.updateTranslationJobs(action={
+    'action': 'revise',
+    'job_ids': [{
+        'job_id': 556,
+        'comment': 'Please change the word banana to gorilla'
+    }, {
+        'job_id': 553,
+        'comment': 'Please change the word banana to monkey'
+    }],
+})
+
+# Reject a group of jobs
+gengo.updateTranslationJobs(action={
     'action': 'reject',
-    'reason': 'quality',
-    'comment': 'My grandmother does better.',
-    'captcha': 'bert'
+    'job_ids': [{
+        'job_id': 630,
+        'reason': 'quality',
+        'comment': 'This sentence should be in the past tense',
+        'captcha': 'AAAA'
+    }, {
+        'job_id': 631,
+        'reason': 'quality',
+        'comment': 'This should have be capitalized',
+        'captcha': 'BBBB'
+    }],
+})
+
+# Approve a group of jobs
+print(gengo.updateTranslationJobs(action={
+  'action': 'approve',
+  'job_ids': [{
+      'job_id': 1077,
+  }, {
+      'job_id': 629,
+  }],
 }))

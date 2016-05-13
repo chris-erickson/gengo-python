@@ -4,7 +4,7 @@
 # noted. Details are below.
 #
 # New BSD License
-# Copyright (c) 2009-2012, Gengo, Inc.
+# Copyright (c) 2009-2015, Gengo, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,10 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Official Python library for interfacing with the Gengo API.
-"""
-
+# mockdb is a file with a dictionary of every API endpoint for Gengo.
 from __future__ import print_function
-
-__author__ = 'Gengo <api@gengo.com>'
+from mockdb import api_urls, apihash
+from _version import __version__
 
 import re
 import copy
@@ -46,7 +43,6 @@ import hmac
 import requests
 import mimetypes
 import sys
-
 from hashlib import sha1
 try:
     from urllib import urlencode, quote
@@ -54,10 +50,6 @@ except ImportError:
     from urllib.parse import urlencode, quote
 from time import time
 from operator import itemgetter
-
-# mockdb is a file with a dictionary of every API endpoint for Gengo.
-from mockdb import api_urls, apihash
-from _version import __version__
 
 # There are some special setups (like a Django application) where
 # simplejson exists. Past Python 2.6, this should never
@@ -79,6 +71,13 @@ except ImportError:
             raise Exception("gengo requires the simplejson library (or " +
                             "Python 2.6+) to work. " +
                             "http://www.undefined.org/python/")
+
+
+"""
+Official Python library for interfacing with the Gengo API.
+"""
+
+__author__ = 'Gengo <api@gengo.com>'
 
 
 class GengoError(Exception):
@@ -205,12 +204,19 @@ class Gengo(object):
                     post_data['jobs']['jobs'] = jobs_dict['jobs']
                 if 'as_group' in jobs_dict:
                     post_data['jobs']['as_group'] = jobs_dict.pop('as_group')
+                if 'comment' in jobs_dict:
+                    post_data['jobs']['comment'] = jobs_dict.pop('comment')
+                if 'url_attachments' in jobs_dict:
+                    post_data['jobs']['url_attachments'] =\
+                     jobs_dict.pop('url_attachments')
             if 'comment' in kwargs:
                 post_data['comment'] = kwargs.pop('comment')
             if 'action' in kwargs:
                 post_data['action'] = kwargs.pop('action')
             if 'job_ids' in kwargs:
                 post_data['job_ids'] = kwargs.pop('job_ids')
+            if 'file_attachments' in kwargs:
+                post_data['file_attachments'] = kwargs.pop('file_attachments')
 
             # Set up a true base URL, abstracting away the need to care
             # about the sandbox mode or API versioning at this stage.
@@ -267,16 +273,55 @@ class Gengo(object):
                             j['file_key'] = 'file_' + k
                             del j['file_path']
 
-            # If any further APIs require their own special signing needs,
-            # fork here...
-            response = self.signAndRequestAPILatest(fn, base, query_params,
-                                                    post_data, file_data)
-            response.connection.close()
+            # handle order url attachments
+            order = post_data.get('jobs', {})
+            self.replaceURLAttachmentsWithAttachments(order)
+
+            # handle post jobs url attachments
+            jobs = post_data.get('jobs', {}).get('jobs', {})
+            for k, j in jobs.items():
+                if isinstance(j, dict):
+                    self.replaceURLAttachmentsWithAttachments(j)
+
+            # handle post comment url attachments
+            comments = post_data.get('comment', {})
+            self.replaceURLAttachmentsWithAttachments(comments)
+
+            try:
+                # If any file_attachments then modify base url to include
+                # private_key and file_data to include file_attachments as
+                # multipart.
+                tmp_files = []
+                if 'file_attachments' in post_data:
+                    file_data = [
+                        ('body', post_data['comment']['body']),
+                    ]
+
+                    file_attachments = post_data['file_attachments']
+                    for a in file_attachments:
+                        f = open(a, 'rb')
+                        tmp_files.append(f)
+                        file_data.append(('file_attachments', f))
+
+                # If any further APIs require their own special signing needs,
+                # fork here...
+                response = self.signAndRequestAPILatest(fn, base, query_params,
+                                                        post_data, file_data)
+                response.connection.close()
+            finally:
+                for f in tmp_files:
+                    f.close()
+
             try:
                 results = response.json()
             except TypeError:
                 # requests<1.0
                 results = response.json
+            except ValueError:
+                msg = "Internal Server Error"
+                if self.debug is True:
+                    msg = "Invalid JSON response: '{0}'".format(response.text)
+                raise GengoError(msg, 1)
 
             # See if we got any errors back that we can cleanly raise on
             if 'opstat' in results and results['opstat'] != 'ok':
@@ -371,6 +416,21 @@ class Gengo(object):
                               # Don't know why but requests is trying to verify
                               # SSL here ...
                               verify=False)
+
+    def replaceURLAttachmentsWithAttachments(self, obj):
+        """
+        This method replaces url_attachments with attachments, which is the
+        data structure the comments API wants, as url_attachments is no longer
+        needed we remove it.
+
+        obj - job or comment object
+        """
+        if 'url_attachments' in obj:
+            if not isinstance(obj['url_attachments'], list):
+                raise GengoError("Job url attachment MUST be an list", 1)
+
+            obj['attachments'] = obj['url_attachments']
+            del obj['url_attachments']
 
     @staticmethod
     def compatibletext(text):

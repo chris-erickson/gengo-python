@@ -40,16 +40,11 @@ from gengo import Gengo
 gengo = Gengo(
     public_key='your_public_key',
     private_key='your_private_key',
-    sandbox=True,
+    sandbox=False,
     debug=True
 )
 
-# Update a job that has an id of 42, and reject it, cite the reason,
-# add a comment, and throw up some captcha stuff. See the docs for
-# more information pertaining to this method, it can do quite a bit. :)
-print(gengo.updateTranslationJob(id=42, action={
-    'action': 'reject',
-    'reason': 'quality',
-    'comment': 'My grandmother does better.',
-    'captcha': 'bert'
-}))
+# Get all the comments on a specific order.
+# Note that this returns a data set, so while we just print it below, you'll
+# inevitably want to iterate over it and such.
+print(gengo.getOrderComments(id=124))

@@ -44,12 +44,18 @@ gengo = Gengo(
     debug=True
 )
 
-# Update a job that has an id of 42, and reject it, cite the reason,
-# add a comment, and throw up some captcha stuff. See the docs for
-# more information pertaining to this method, it can do quite a bit. :)
-print(gengo.updateTranslationJob(id=42, action={
-    'action': 'reject',
-    'reason': 'quality',
-    'comment': 'My grandmother does better.',
-    'captcha': 'bert'
-}))
+# Post a comment with attachments on a specific job; perhaps you have some context for the
+# translator or something of the sort.
+print(gengo.postTranslationJobComment(
+    id=42,
+    comment={
+        'body': 'I love lamp!',
+        'url_attachments': [
+            {
+                'url': 'https://gengo.github.io/style-guide/assets/images/logos/gengo_logo_circle_512.png',
+                'filename': 'gengo_logo_circle_512.png',
+                'mime_type': 'image/png',
+            }
+        ],
+    },
+))

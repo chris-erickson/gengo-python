@@ -3,7 +3,7 @@
 # noted. Details are below.
 #
 # New BSD License
-# Copyright (c) 2009-2012, Gengo, Inc.
+# Copyright (c) 2009-2015, Gengo, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,12 @@ apihash = {
         'method': 'PUT',
     },
 
+    # Updating an existing translation requests.
+    'updateTranslationJobs': {
+        'url': '/translate/jobs',
+        'method': 'PUT',
+    },
+
     # Viewing existing translation requests.
     'getTranslationJob': {
         'url': '/translate/job/{{id}}',
@@ -123,7 +129,7 @@ apihash = {
         'method': 'GET',
     },
     'getTranslationJobRevision': {
-        'url': '/translate/job/{{id}}/revisions/{{revision_id}}',
+        'url': '/translate/job/{{id}}/revision/{{revision_id}}',
         'method': 'GET',
     },
 
@@ -169,6 +175,17 @@ apihash = {
     'deleteTranslationOrder': {
         'url': '/translate/order/{{id}}',
         'method': 'DELETE',
+    },
+
+    # Deal with comments and other metadata about an Order in
+    # progress.
+    'postOrderComment': {
+        'url': '/translate/order/{{id}}/comment',
+        'method': 'POST',
+    },
+    'getOrderComments': {
+        'url': '/translate/order/{{id}}/comments',
+        'method': 'GET',
     },
 
     # get list of preferred translators

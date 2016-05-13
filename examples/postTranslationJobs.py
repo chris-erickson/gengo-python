@@ -6,7 +6,7 @@
 # noted. Details are below.
 #
 # New BSD License
-# Copyright (c) 2009-2012, myGengo, Inc.
+# Copyright (c) 2009-2015, Gengo, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -18,7 +18,7 @@
 # Redistributions in binary form must reproduce the above copyright notice,
 # this list of conditions and the following disclaimer in the documentation
 # and/or other materials provided with the distribution.
-# Neither the name of myGengo, Inc. nor the names of its contributors may
+# Neither the name of Gengo, Inc. nor the names of its contributors may
 # be used to endorse or promote products derived from this software
 # without specific prior written permission.
 #
@@ -41,6 +41,7 @@ gengo = Gengo(
     public_key='your_public_key',
     private_key='your_private_key',
     sandbox=True,
+    debug=True
 )
 
 # This is an exhaustive view of this object; chances are your code will never
@@ -57,6 +58,13 @@ data = {
 
             'auto_approve': 0,  # OPTIONAL. Hopefully self explanatory (1 = yes, 0 = no),
             'comment': 'HEY THERE TRANSLATOR',  # OPTIONAL. Comment to leave for translator.
+            'url_attachments': [  # OPTIONAL. Comment URL attachments.
+                {
+                    'url': 'https://gengo.github.io/style-guide/assets/images/logos/gengo_logo_circle_512.png',
+                    'filename': 'gengo_logo_circle_512.png',
+                    'mime_type': 'image/png',
+                },
+            ],
             'callback_url': 'http://...',  # OPTIONAL. Callback URL that updates are sent to.
             'custom_data': 'your optional custom data, limited to 1kb.'  # OPTIONAL
         },
@@ -74,9 +82,10 @@ data = {
             'custom_data': 'your optional custom data, limited to 1kb.'  # OPTIONAL
         },
     },
+    'comment': 'Please make sure each translation sounds formal.',
     'process': 1,  # OPTIONAL. 1 (true, default) / 0 (false). Whether to pay for the job(s) and make them available for translation.
     'as_group': 1,  # OPTIONAL. 1 (true) / 0 (false, default). Whether all jobs in this group should be done by one translator.
 }
 
 # And now we post them over...
-gengo.postTranslationJobs(jobs=data)
+print(gengo.postTranslationJobs(jobs=data))
